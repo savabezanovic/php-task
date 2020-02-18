@@ -8,8 +8,21 @@ class UserModel extends Model {
     public $lastName;
     public $age;
     public static $id;
-    public static $array = [];
     public $counter = 0;
+
+    public static $array = [];
+
+    protected $query = [];
+
+    public function __construct($query = NULL) {
+
+    	if($query) {
+
+    		$this->query = $query;
+
+    	}
+
+    }
 
     public function save() {
 
@@ -38,15 +51,11 @@ class UserModel extends Model {
 
     public static function select($string) {
 
-    	self::$array[] = " SELECT " . $string . " FROM " . self::$table;
+    	$n = count(self::$array);
 
-  //   	$n = count(self::$array);
+		self::$array[$n] = ['SELECT ' . $string . ' FROM '. self::$table];
 
-		// self::$array[$n] = ['SELECT ' . $string . ' FROM '. self::$table];
-
-		// return new self($array[$n]);
-
- 		return new self;
+		return new self($array[$n]);
 
     }
 
@@ -65,11 +74,11 @@ class UserModel extends Model {
 
     		$this->counter++;
 
-    		self::$array[] = " WHERE " . $one . " " . $two . " " . $three;
+    		$this->query[] = $this->query[] . " WHERE " . $one . " " . $two . " " . $three;
 
     	} else if ($this->counter !== 0) {
 
-    		self::$array[] = " AND " . $one . " " . $two . " " . $three;
+    		$this->query[] = $this->query[] . " AND " . $one . " " . $two . " " . $three;
 
     	}
 
@@ -103,10 +112,6 @@ class UserModel extends Model {
     		$stmt = Database::connect()->prepare($sql);
     		$stmt->execute();
     		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    		var_dump($results);
-
-    		self::$array = null;
 
     		return $results;
 
@@ -164,6 +169,14 @@ class UserModel extends Model {
 
     	}	
 
+    }
+
+    public function bla(){
+    	echo "<br>";
+
+		var_dump(self::$array);
+
+		echo "<br>";
     }
 
 }
