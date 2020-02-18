@@ -2,13 +2,14 @@
 
 class UserModel extends Model {
 
-    protected $table = 'users';
+    public static $table = 'users';
 
     public $firstName;
     public $lastName;
     public $age;
     public static $id;
     public static $array = [];
+    public $counter = 0;
 
     public function save() {
 
@@ -37,14 +38,22 @@ class UserModel extends Model {
 
     public static function select($string) {
 
-    	self::$array["what"] = $string;
+    	self::$array[] = " SELECT " . $string . " FROM " . self::$table;
+
+  //   	$n = count(self::$array);
+
+		// self::$array[$n] = ['SELECT ' . $string . ' FROM '. self::$table];
+
+		// return new self($array[$n]);
 
  		return new self;
 
     }
 
 
-    public function join($one, $two, $three, $four) {
+    public function join($table, $fieldOne, $symbol, $fieldTwo) {
+
+    	self::$array[] = " RIGHT JOIN " . $table . " ON " . $fieldOne . $symbol . $fieldTwo;
 
     	return $this;
 
@@ -52,13 +61,15 @@ class UserModel extends Model {
 
     public function where($one, $two, $three) {
 
-    	if (empty(self::$array["where"])) {
-    		
-    		self::$array["where"] = [$one, $two, $three];
+    	if($this->counter === 0) {
 
-    	} else {
+    		$this->counter++;
 
-    	self::$array["where2"] = [$one, $two, $three]; 
+    		self::$array[] = " WHERE " . $one . " " . $two . " " . $three;
+
+    	} else if ($this->counter !== 0) {
+
+    		self::$array[] = " AND " . $one . " " . $two . " " . $three;
 
     	}
 
@@ -68,7 +79,7 @@ class UserModel extends Model {
 
     public function orderBy($one, $two) {
 
-    	self::$array["order"] = [$one, $two];
+    	self::$array[] = " ORDER BY " . $one . " " . $two;
 
     	return $this;
 
@@ -76,7 +87,7 @@ class UserModel extends Model {
 
     public function limit($one) {
 
-    	self::$array["limit"] = $one;
+    	self::$array[] = ' LIMIT ' . $one;
 
     	return $this;
 
@@ -86,31 +97,18 @@ class UserModel extends Model {
 
     public function get() {
 
-    	// $array = [
-
-    	// 	"what" => "*",
-    	// 	"where" => ["age", ">", 40],
-    	// 	"where2" => ["age", "<", 50],
-    	// 	"order" => ["age", "DESC"],
-    	// 	"limit" => 5
-
-    	// ];
-
     	try {
 
-    		$sql = "SELECT " . self::$array["what"] . " FROM users WHERE " . "users." . implode(" ", self::$array["where"]) . " AND " . "users."  . implode(" ", self::$array["where2"]) . " ORDER BY users." . implode(" ", self::$array["order"]) . " LIMIT " . self::$array["limit"];
-
-    		// $sql = "SELECT * FROM users WHERE users.age > 40 AND users.age < 50 ORDER BY users.age DESC LIMIT 5";
-
+    		$sql = implode(" ", self::$array);
     		$stmt = Database::connect()->prepare($sql);
     		$stmt->execute();
     		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    		echo "<br> Get found you this:";
+    		var_dump($results);
 
-    		foreach ($results as $key => $value) {
-    			echo "<br>" . $value["firstName"];
-    		}
+    		self::$array = null;
+
+    		return $results;
 
     	} catch (PDOException $e) {
 
@@ -134,7 +132,7 @@ class UserModel extends Model {
 
 			self::$id = $results[0]["id"];
 
-			echo "<br> Find found you this: <br>" . $results[0]["firstName"];
+			return $results;
 
     	} catch (PDOException $e) {
 
@@ -157,6 +155,8 @@ class UserModel extends Model {
 			$stmt = Database::connect()->prepare($sql);
 
 			$stmt->execute();
+
+			echo "Update was succesful!";
 
     	} catch (PDOException $e) {
 
