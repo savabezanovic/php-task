@@ -7,18 +7,12 @@ require "UserModel.php";
 // Saving
 
 $user1 = new UserModel();
-$user1->firstName = 'Snoop';
-$user1->lastName = 'Dogg';
-$user1->age = 48;
-$user1->save();
+// $user1->save(["Sava", "Bezanovic", 23]);
 
-echo "<br>";
+// echo "<br>";
 
-$user2 = new UserModel();
-$user2->firstName = 'Bla';
-$user2->lastName = 'Truc';
-$user2->age = 45;
-$user2->save();
+// $user2 = new UserModel();
+// $user2->save(["Spasoje", "Spasic", 30]);
 
 echo "<br>";
 
@@ -29,8 +23,8 @@ echo "People: <br>";
 
 $people = UserModel
     ::select('*')
-    ->where('age', '>', 40)
-    ->where('age', '<', 50)
+    ->where('age', '>', 20)
+    ->where('age', '<', 30)
     ->orderBy('age', 'desc')
     ->limit(5)
     ->get();
@@ -47,18 +41,20 @@ echo "Find: <br>";
 
 $snoopDogg = UserModel::find(75);
 
-foreach($snoopDogg as $data => $values) {
+foreach($snoopDogg->{"foundData"} as $data) {
 
-	echo $values["firstName"] . " " . $values["lastName"] . "<br>";
+    echo $data . "<br>";
 
 }
 
+
+
 // Update
 
-echo "Update: <br>";
+echo "<br> Update: <br>";
 
-$snoopDogg = new UserModel();
-$snoopDogg->update(['name' => 'Snoopy']);
+// $snoopDogg = new UserModel();
+$snoopDogg->update(['name' => 'Sava']);
 
 // Joining
 
