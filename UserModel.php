@@ -10,40 +10,16 @@ class UserModel extends Model {
     public static $id;
     public $counter = 0;
 
-    public static $array = [];
+    public static $array;
+    protected $query;
 
-    protected $query = [];
+    public function __construct() {
 
-    public function __construct($query = NULL) {
+    	{
 
-    	if($query) {
+    		$this->query = self::$array;
 
-    		$this->query = $query;
-
-    	}
-
-    }
-
-    public function save() {
-
-
-    	try {
-
-    		$sql = "INSERT INTO users (firstName, lastName, age) VALUES (:firstName, :lastName, :age)";
-
-			$stmt = Database::connect()->prepare($sql);
-
-			$stmt->BindParam(':firstName', $this->firstName, PDO::PARAM_STR);
-			$stmt->BindParam(':lastName', $this->lastName, PDO::PARAM_STR);
-			$stmt->BindParam(':age', $this->age, PDO::PARAM_STR);
-
-			$stmt->execute();
-
-			echo " New user saved to the database! ";
-
-    	} catch (PDOException $e) {
-
-    		echo " Did not manage to save new user " . $e->getMessage() . " !";
+    		self::$array = "";
 
     	}
 
@@ -51,18 +27,16 @@ class UserModel extends Model {
 
     public static function select($string) {
 
-    	$n = count(self::$array);
+			self::$array = 'SELECT ' . $string . ' FROM '. self::$table;
 
-		self::$array[$n] = ['SELECT ' . $string . ' FROM '. self::$table];
-
-		return new self($array[$n]);
+			return new self; 
 
     }
 
 
     public function join($table, $fieldOne, $symbol, $fieldTwo) {
 
-    	self::$array[] = " RIGHT JOIN " . $table . " ON " . $fieldOne . $symbol . $fieldTwo;
+    	$this->query = $this->query . " RIGHT JOIN " . $table . " ON " . $fieldOne . $symbol . $fieldTwo;
 
     	return $this;
 
@@ -74,11 +48,11 @@ class UserModel extends Model {
 
     		$this->counter++;
 
-    		$this->query[] = $this->query[] . " WHERE " . $one . " " . $two . " " . $three;
+    		$this->query = $this->query . " WHERE " . $one . " " . $two . " " . $three;
 
     	} else if ($this->counter !== 0) {
 
-    		$this->query[] = $this->query[] . " AND " . $one . " " . $two . " " . $three;
+    		$this->query = $this->query . " AND " . $one . " " . $two . " " . $three;
 
     	}
 
@@ -88,7 +62,7 @@ class UserModel extends Model {
 
     public function orderBy($one, $two) {
 
-    	self::$array[] = " ORDER BY " . $one . " " . $two;
+    	$this->query = $this->query . " ORDER BY " . $one . " " . $two;
 
     	return $this;
 
@@ -96,7 +70,7 @@ class UserModel extends Model {
 
     public function limit($one) {
 
-    	self::$array[] = ' LIMIT ' . $one;
+    	$this->query = $this->query . ' LIMIT ' . $one;
 
     	return $this;
 
@@ -108,11 +82,11 @@ class UserModel extends Model {
 
     	try {
 
-    		$sql = implode(" ", self::$array);
+    		// $sql = implode(" ", $this->query);
+    		$sql = $this->query;
     		$stmt = Database::connect()->prepare($sql);
     		$stmt->execute();
     		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
     		return $results;
 
     	} catch (PDOException $e) {
@@ -169,14 +143,6 @@ class UserModel extends Model {
 
     	}	
 
-    }
-
-    public function bla(){
-    	echo "<br>";
-
-		var_dump(self::$array);
-
-		echo "<br>";
     }
 
 }
