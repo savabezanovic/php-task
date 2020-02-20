@@ -1,7 +1,9 @@
 <?php
 
-require_once "Database.php";
+namespace Core\Models;
 
+use Core\Database\Database;
+use \PDO;
 
 class Model {
 

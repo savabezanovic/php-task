@@ -1,7 +1,13 @@
 <?php
 
-require_once "UserModel.php";
-require_once "PetModel.php";
+include './vendor/autoload.php';
+
+use App\Models\UserModel;
+use App\Models\PetModel;
+use Symfony\Component\Dotenv\Dotenv;
+
+$dotenv = new Dotenv();
+$dotenv->load(__DIR__.'/.env');
 
 // Saving
 
