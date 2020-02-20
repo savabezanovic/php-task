@@ -1,16 +1,22 @@
 <?php
 
+require_once "Database.php";
+
+
 class Model {
 
 	protected static $table;
-
 	public $fields = [];
+    public $values = [];
 
-    public $values = ["first_name" => "Sava"];
-    public static $id;
+    public static $id; 
+    public $userId;
+
     public $counter = 0;
-    public static $array;
+
+    public static $array = [];
     protected $query = [];
+
     public $foundData;
 
     public function __construct($foundData = null) {
@@ -19,7 +25,11 @@ class Model {
 
             $this->query = self::$array;
 
-            self::$array = "";
+            self::$array = [];
+
+            $this->userId = self::$id;
+
+            self::$id = null;
 
             if($foundData) {
 
@@ -33,21 +43,26 @@ class Model {
 
 	public function save($niz) {
 
+    //     $niz = [
+    //     "first_name" => "Sava", 
+    //     "last_name" => "Bezanovic", 
+    //     "age" => 48];
+
         $this->values = $niz;
 
     	try {
 
-    		$sql = "INSERT INTO " . static::$table . " (" . implode(", ",$this->fields) . ") VALUES (:" . implode(", :", $this->fields) . ")";
+    		$sql = "INSERT INTO " . static::$table . " (" . implode(", ", array_keys($this->values)) . ") VALUES (:" . implode(", :", array_keys($this->values)) . ")";
 
 			$stmt = Database::connect()->prepare($sql);
 
-			foreach($this->values as $value) {
-				$stmt->bindValue(':' . $fields[], $value, PDO::PARAM_STR);
-			}
+            foreach($this->values as $field => $value) { 
+            
+                $stmt->bindValue(":" . $field, $value, PDO::PARAM_STR);
+
+            }
 
 			$stmt->execute();
-
-            return static::
 
 			echo " New user saved to the database! ";
 
@@ -61,7 +76,7 @@ class Model {
 
     public static function select($string) {
 
-			self::$array["select"] = ['SELECT ' . $string . ' FROM '. static::$table];
+			self::$array["select"] = 'SELECT ' . $string . ' FROM '. static::$table;
 
 			return new static; 
 
@@ -69,7 +84,7 @@ class Model {
 
    	public function join($table, $fieldOne, $symbol, $fieldTwo) {
 
-    	$this->query["join"] = [" RIGHT JOIN " . $table . " ON " . $fieldOne . $symbol . $fieldTwo];
+    	$this->query["join"] = " RIGHT JOIN " . $table . " ON " . $fieldOne . $symbol . $fieldTwo;
 
     	return $this;
 
@@ -81,11 +96,11 @@ class Model {
 
     		$this->counter++;
 
-    		$this->query["where"] = [" WHERE " . $one . " " . $two . " " . $three];
+    		$this->query["where"] = " WHERE " . $one . " " . $two . " " . $three;
 
     	} else if ($this->counter !== 0) {
 
-    		$this->query["where"][] = [" AND " . $one . " " . $two . " " . $three];
+    		$this->query["where"] .= " AND " . $one . " " . $two . " " . $three;
 
     	}
 
@@ -95,7 +110,7 @@ class Model {
 
     public function orderBy($one, $two) {
 
-    	$this->query["orderBy"] = [" ORDER BY " . $one . " " . $two];
+    	$this->query["orderBy"] = " ORDER BY " . $one . " " . $two;
 
     	return $this;
 
@@ -103,7 +118,7 @@ class Model {
 
     public function limit($one) {
 
-    	$this->query["limit"] = [' LIMIT ' . $one];
+    	$this->query["limit"] = ' LIMIT ' . $one;
 
     	return $this;
 
@@ -113,13 +128,19 @@ class Model {
 
     public function get() {
 
+        // $query = [
+
+        //     "select" => 'SELECT ' . $string . ' FROM '. static::$table,
+        //     "join" => " RIGHT JOIN " . $table . " ON " . $fieldOne . $symbol . $fieldTwo,
+        //     "where" => " WHERE " . $one . " " . $two . " " . $three " AND " . $one . " " . $two . " " . $three,
+        //     "orderBy" => " ORDER BY " . $one . " " . $two,
+        //     "limit" => ' LIMIT ' . $one
+
+        // ];
+
     	try {
 
-    		// $sql = implode(" ", $this->query);
-    		$sql = $this->query;
-
-            var_dump($sql);
-    
+    		$sql = implode(" ", $this->query);
     		$stmt = Database::connect()->prepare($sql);
     		$stmt->execute();
     		$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -137,7 +158,7 @@ class Model {
 
     	try {
 
-    		$sql = "SELECT * FROM users WHERE users.id = '$id' ";
+    		$sql = "SELECT * FROM " . static::$table . " WHERE " . static::$table . ".id = '$id' ";
 
 			$stmt = Database::connect()->prepare($sql);
 
@@ -163,12 +184,12 @@ class Model {
 
     public function update($data) {
 
-    	$id = self::$id;
+    	$id = $this->userId;
 
     	try {
 
             $sql = "UPDATE " . static::$table . " SET " . static::$table . "." . key($data) . " = '" . $data[key($data)] . "' WHERE " . static::$table .".id = '$id' ";
-            echo $sql;
+
 			$stmt = Database::connect()->prepare($sql);
 
 			$stmt->execute();
