@@ -1,7 +1,7 @@
 <?php
 
 namespace Core\Database;
-
+use Config\Config;
 use \PDO;
 
 class Database {
@@ -10,11 +10,13 @@ class Database {
 
 	private static function setConnection() {
 
-		$dsn = "mysql:host=" . $_ENV['DB_HOST'] . ";dbname=" . $_ENV['DB_NAME'] . ";";
-		self::$pdo = new PDO($dsn, $_ENV['DB_USER'], $_ENV['DB_PASS']);
+		$configProvider = Config::get();
+		$config = $configProvider->getConfig();
+
+		$dsn = "mysql:host=" . $config["host"] . ";dbname=" . $config["db"] . ";";
+		self::$pdo = new PDO($dsn, $config["user"], $config["password"]);
 		self::$pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 		self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
 		return self::$pdo;
 	}
 

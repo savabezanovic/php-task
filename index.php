@@ -5,6 +5,7 @@ include './vendor/autoload.php';
 use App\Models\UserModel;
 use App\Models\PetModel;
 use Symfony\Component\Dotenv\Dotenv;
+use Config\Config;
 
 $dotenv = new Dotenv();
 $dotenv->load(__DIR__.'/.env');
